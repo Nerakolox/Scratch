@@ -260,37 +260,6 @@
   animation: scratch-toast-in 220ms var(--ease-smooth) backwards;
 }
 
-/* ---------- Deletion ghost ---------- */
-
-@keyframes scratch-type-out {
-  from {
-    opacity: 0.85;
-    filter: blur(0);
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    filter: blur(3px);
-    transform: translateY(-2px);
-  }
-}
-
-/* Fixed to the viewport on purpose: the ghost must not depend on any ancestor's
-   positioning context, and its font metrics are copied inline from the editor
-   so it lands on the exact line and column the deleted text occupied. */
-.scratch-type-ghost {
-  position: fixed;
-  /* Above the card editor overlay (80), below modal dialogs (100). */
-  z-index: 90;
-  margin: 0;
-  padding: 0;
-  pointer-events: none;
-  user-select: none;
-  white-space: pre;
-  text-rendering: optimizeSpeed;
-  animation: scratch-type-out 240ms var(--ease-standard) both;
-}
-
 /* ---------- Brand artwork ---------- */
 
 /* Transparent logo, no tile: in dark mode flip the ink so the pen stays
@@ -308,7 +277,6 @@
 /* ---------- Paper prose ---------- */
 
 .scratch-prose .tiptap {
-  position: relative;
   outline: none;
   min-height: 55vh;
   font-size: 16px;
@@ -739,7 +707,6 @@
   padding: 12px 16px;
 }
 .scratch-card-editor__content .tiptap {
-  position: relative;
   outline: none;
   min-height: 120px;
   font-size: 14px;

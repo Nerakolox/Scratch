@@ -10,7 +10,6 @@ import { Check, PencilLine } from 'lucide-react'
 import type { TipTapNode } from '@/core/models/types'
 import { useDocumentService, useServiceState } from '@/features/workspace/WorkspaceContext'
 import { AssetImage, BlockIds, CodeBlockWithTools } from '@/features/paper/extensions'
-import { DeletionGhost } from '@/features/paper/deletion-ghost'
 import { markdownToHtml, shouldConvertMarkdownClipboard } from '@/features/paper/markdown-paste'
 import { Button } from '@/shared/ui'
 
@@ -77,7 +76,6 @@ export function CardEditorOverlay({
         TableKit.configure({ table: { resizable: false } }),
         AssetImage.configure({ allowBase64: true }),
         BlockIds,
-        DeletionGhost,
       ],
       content: {
         type: 'doc',

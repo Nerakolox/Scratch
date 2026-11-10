@@ -22,7 +22,6 @@ import type { TipTapNode } from '@/core/models/types'
 import { nodeToPlainText } from '@/core/content'
 import { useDocumentService, useServiceState } from '@/features/workspace/WorkspaceContext'
 import { AssetImage, BlockIds, CodeBlockWithTools } from './extensions'
-import { DeletionGhost } from './deletion-ghost'
 import { filterSlashCommands, type SlashCommand } from './slash-commands'
 import { Dialog, IconButton, inputClass } from '@/shared/ui'
 import { toast } from '@/shared/toast'
@@ -124,7 +123,6 @@ export function PaperEditor() {
         Typography,
         AssetImage.configure({ allowBase64: true }),
         BlockIds,
-        DeletionGhost,
       ],
       content: docFromBlocks(sessionNodes),
       autofocus: false,
