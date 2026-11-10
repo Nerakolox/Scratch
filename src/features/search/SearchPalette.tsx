@@ -92,12 +92,12 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
 
   return createPortal(
     <div className="fixed inset-0 z-[95] flex items-start justify-center px-4 pt-[12vh]">
-      <div className="absolute inset-0 bg-black/25 backdrop-blur-[2px]" onClick={onClose} aria-hidden />
+      <div className="absolute inset-0 bg-black/25 backdrop-blur-[2px] motion-fade" onClick={onClose} aria-hidden />
       <div
         role="dialog"
         aria-modal="true"
         aria-label="搜索草稿"
-        className="relative w-full max-w-[560px] overflow-hidden rounded-xl border border-line bg-elevated shadow-xl"
+        className="relative w-full max-w-[560px] overflow-hidden rounded-xl border border-line bg-elevated shadow-xl motion-panel"
       >
         <div className="flex items-center gap-2.5 border-b border-line px-4">
           <Search size={16} className="text-faint" aria-hidden />

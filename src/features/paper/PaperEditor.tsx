@@ -22,6 +22,7 @@ import type { TipTapNode } from '@/core/models/types'
 import { nodeToPlainText } from '@/core/content'
 import { useDocumentService, useServiceState } from '@/features/workspace/WorkspaceContext'
 import { AssetImage, BlockIds, CodeBlockWithTools } from './extensions'
+import { DeletionGhost } from './deletion-ghost'
 import { filterSlashCommands, type SlashCommand } from './slash-commands'
 import { Dialog, IconButton, inputClass } from '@/shared/ui'
 import { toast } from '@/shared/toast'
@@ -123,6 +124,7 @@ export function PaperEditor() {
         Typography,
         AssetImage.configure({ allowBase64: true }),
         BlockIds,
+        DeletionGhost,
       ],
       content: docFromBlocks(sessionNodes),
       autofocus: false,
@@ -310,95 +312,97 @@ export function PaperEditor() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto w-full max-w-[820px] px-6 pb-40 pt-12 md:px-10 md:pt-16">
-        <input
-          value={scratch.title}
-          onChange={(event) => void service.renameScratch(scratch.id, event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === 'ArrowDown') {
-              event.preventDefault()
-              editor?.commands.focus('start')
-            }
-          }}
-          placeholder="未命名草稿"
-          aria-label="草稿标题"
-          spellCheck={false}
-          className="w-full bg-transparent text-[28px] font-semibold leading-tight tracking-[-0.015em] text-ink outline-none placeholder:text-faint md:text-[32px]"
-        />
-        <div className="mt-2 flex items-center gap-2 text-[11.5px] text-faint">
-          <span>更新于 {formatRelativeTime(scratch.updatedAt)}</span>
-          {wordCount > 0 && (
-            <>
-              <span aria-hidden>·</span>
-              <span>{wordCount} 字</span>
-            </>
-          )}
-        </div>
+      <div className="mx-auto w-full max-w-[800px] px-4 py-4 md:px-6 md:py-5">
+        <div className="min-h-[calc(100vh-9rem)] rounded-sheet bg-elevated px-6 pb-28 pt-10 shadow-sheet md:px-14 md:pb-36 md:pt-14">
+          <input
+            value={scratch.title}
+            onChange={(event) => void service.renameScratch(scratch.id, event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === 'ArrowDown') {
+                event.preventDefault()
+                editor?.commands.focus('start')
+              }
+            }}
+            placeholder="未命名草稿"
+            aria-label="草稿标题"
+            spellCheck={false}
+            className="w-full bg-transparent text-[28px] font-semibold leading-tight tracking-[-0.015em] text-ink outline-none placeholder:text-faint md:text-[32px]"
+          />
+          <div className="mt-2 flex items-center gap-2 text-[11.5px] text-faint">
+            <span>更新于 {formatRelativeTime(scratch.updatedAt)}</span>
+            {wordCount > 0 && (
+              <>
+                <span aria-hidden>·</span>
+                <span>{wordCount} 字</span>
+              </>
+            )}
+          </div>
 
-        <div className="scratch-prose mt-8">
-          {editor && (
-            <BubbleMenu
-              editor={editor}
-              className="flex items-center gap-0.5 rounded-lg border border-line bg-elevated p-1 shadow-md"
-            >
-              <IconButton
-                label="加粗"
-                size="sm"
-                active={editor.isActive('bold')}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => editor.chain().focus().toggleBold().run()}
+          <div className="scratch-prose mt-8">
+            {editor && (
+              <BubbleMenu
+                editor={editor}
+                className="flex items-center gap-0.5 rounded-lg border border-line bg-elevated p-1 shadow-md motion-menu"
               >
-                <Bold size={14} />
-              </IconButton>
-              <IconButton
-                label="斜体"
-                size="sm"
-                active={editor.isActive('italic')}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => editor.chain().focus().toggleItalic().run()}
-              >
-                <Italic size={14} />
-              </IconButton>
-              <IconButton
-                label="删除线"
-                size="sm"
-                active={editor.isActive('strike')}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => editor.chain().focus().toggleStrike().run()}
-              >
-                <Strikethrough size={14} />
-              </IconButton>
-              <IconButton
-                label="行内代码"
-                size="sm"
-                active={editor.isActive('code')}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => editor.chain().focus().toggleCode().run()}
-              >
-                <Code size={14} />
-              </IconButton>
-              <IconButton
-                label="链接"
-                size="sm"
-                active={editor.isActive('link')}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={openLinkDialog}
-              >
-                <Link2 size={14} />
-              </IconButton>
-            </BubbleMenu>
-          )}
-          {editor && (
-            <DragHandle editor={editor}>
-              <div
-                className="flex h-7 w-5 cursor-grab items-center justify-center rounded text-faint hover:bg-sunken hover:text-ink"
-                title="拖动以移动此块"
-              >
-                <GripVertical size={14} />
-              </div>
-            </DragHandle>
-          )}
-          <EditorContent editor={editor} />
+                <IconButton
+                  label="加粗"
+                  size="sm"
+                  active={editor.isActive('bold')}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => editor.chain().focus().toggleBold().run()}
+                >
+                  <Bold size={14} />
+                </IconButton>
+                <IconButton
+                  label="斜体"
+                  size="sm"
+                  active={editor.isActive('italic')}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => editor.chain().focus().toggleItalic().run()}
+                >
+                  <Italic size={14} />
+                </IconButton>
+                <IconButton
+                  label="删除线"
+                  size="sm"
+                  active={editor.isActive('strike')}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => editor.chain().focus().toggleStrike().run()}
+                >
+                  <Strikethrough size={14} />
+                </IconButton>
+                <IconButton
+                  label="行内代码"
+                  size="sm"
+                  active={editor.isActive('code')}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => editor.chain().focus().toggleCode().run()}
+                >
+                  <Code size={14} />
+                </IconButton>
+                <IconButton
+                  label="链接"
+                  size="sm"
+                  active={editor.isActive('link')}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={openLinkDialog}
+                >
+                  <Link2 size={14} />
+                </IconButton>
+              </BubbleMenu>
+            )}
+            {editor && (
+              <DragHandle editor={editor}>
+                <div
+                  className="flex h-7 w-5 cursor-grab items-center justify-center rounded text-faint hover:bg-sunken hover:text-ink"
+                  title="拖动以移动此块"
+                >
+                  <GripVertical size={14} />
+                </div>
+              </DragHandle>
+            )}
+            <EditorContent editor={editor} />
+          </div>
         </div>
       </div>
 
@@ -416,7 +420,7 @@ export function PaperEditor() {
             role="listbox"
             aria-label="插入内容"
             style={{ left: slash.left, top: slash.top }}
-            className="fixed z-[90] w-[288px] overflow-hidden rounded-xl border border-line bg-elevated shadow-lg"
+            className="fixed z-[90] w-[288px] overflow-hidden rounded-xl border border-line bg-elevated shadow-lg motion-menu"
           >
             <div className="border-b border-line px-3 py-1.5 text-[10.5px] font-medium uppercase tracking-[0.06em] text-faint">
               插入内容

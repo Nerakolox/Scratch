@@ -10,7 +10,6 @@ import { DocumentService, type ServiceState } from '@/storage/document-service'
 import { ScratchRepository } from '@/storage/repository'
 import { getDb } from '@/storage/db'
 import { BackupService, type BackupState } from '@/features/backup/backup-service'
-import { Spinner } from '@/shared/ui'
 
 const ServiceContext = createContext<DocumentService | null>(null)
 const BackupContext = createContext<BackupService | null>(null)
@@ -64,7 +63,17 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   if (!state.ready) {
     return (
       <div className="flex h-full items-center justify-center bg-canvas">
-        <Spinner label="正在打开本地草稿…" />
+        <div className="flex flex-col items-center gap-5">
+          <img
+            src="/scratch-writing.gif"
+            alt=""
+            className="brand-image h-[160px] w-[160px] object-contain"
+            draggable={false}
+          />
+          <span role="status" className="motion-fade text-[12.5px] text-muted">
+            正在打开本地草稿…
+          </span>
+        </div>
       </div>
     )
   }

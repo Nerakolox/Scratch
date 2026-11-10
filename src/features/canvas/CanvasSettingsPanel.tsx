@@ -1,4 +1,5 @@
 import { X } from 'lucide-react'
+import { Switch } from '@/shared/ui'
 import {
   DEFAULT_CANVAS_PREFERENCES,
   type CanvasPreferences,
@@ -49,42 +50,35 @@ export function CanvasSettingsPanel({
     <div
       role="dialog"
       aria-label="画布设置"
-      className="absolute right-0 top-full z-30 mt-2 w-72 max-w-[calc(100vw-24px)] rounded-xl border border-line bg-elevated p-3 text-left shadow-lg"
+      className="absolute right-0 top-full z-30 mt-2 w-72 max-w-[calc(100vw-24px)] rounded-xl border border-line/70 bg-elevated p-3 text-left shadow-panel motion-menu"
     >
-      <div className="flex items-center justify-between gap-3 px-1 pb-1">
+      <div className="flex items-center justify-between gap-3 px-3 pb-1 pt-0.5">
         <h2 className="text-[12.5px] font-semibold text-ink">画布设置</h2>
         <button
           type="button"
           onClick={onClose}
           aria-label="关闭画布设置"
-          className="rounded p-0.5 text-faint hover:bg-sunken hover:text-ink"
+          className="rounded-md p-1 text-faint hover:bg-sunken hover:text-ink"
         >
           <X size={14} />
         </button>
       </div>
       <div className="mt-1 space-y-0.5">
         {ITEMS.map((item) => (
-          <label
+          <Switch
             key={item.key}
-            className="flex cursor-pointer items-start gap-2.5 rounded-lg px-2 py-2 hover:bg-sunken/60"
-          >
-            <input
-              type="checkbox"
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-line accent-[var(--scratch-accent)]"
-              checked={preferences[item.key]}
-              onChange={(event) => onChange({ [item.key]: event.target.checked })}
-            />
-            <span className="min-w-0">
-              <span className="block text-[12.5px] font-medium text-ink">{item.label}</span>
-              <span className="block text-[11px] leading-relaxed text-faint">{item.hint}</span>
-            </span>
-          </label>
+            checked={preferences[item.key]}
+            onChange={(checked) => onChange({ [item.key]: checked })}
+            label={item.label}
+            description={item.hint}
+          />
         ))}
       </div>
-      <div className="mt-2 border-t border-line pt-2">
+      <div className="mt-1 flex items-center justify-between gap-2 rounded-lg bg-sunken/50 px-3 py-1.5">
+        <span className="text-[10.5px] text-faint">设置保存在本机</span>
         <button
           type="button"
-          className="rounded-md px-2 py-1 text-[11.5px] text-muted hover:bg-sunken hover:text-ink"
+          className="rounded-md px-1.5 py-0.5 text-[11.5px] text-muted hover:bg-sunken hover:text-ink"
           onClick={() => onChange({ ...DEFAULT_CANVAS_PREFERENCES })}
         >
           恢复默认

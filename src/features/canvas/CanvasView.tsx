@@ -496,8 +496,8 @@ export default function CanvasView() {
   }
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-canvas">
-      <div className="absolute inset-0">
+    <div className="h-full w-full overflow-hidden p-2 md:p-3">
+      <div className="relative h-full w-full overflow-hidden rounded-sheet bg-sunken shadow-sheet dark:bg-canvas">
         <Tldraw
           licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
           shapeUtils={[BlockCardShapeUtil]}
@@ -505,114 +505,115 @@ export default function CanvasView() {
           options={{ createTextOnCanvasDoubleClick: false }}
           components={componentOverrides}
         />
-      </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center p-3">
-        <div className="pointer-events-auto flex items-center gap-1 rounded-lg border border-line bg-elevated/95 p-1 shadow-sm backdrop-blur">
-          <Button
-            size="sm"
-            variant="secondary"
-            icon={<Plus size={14} />}
-            loading={addingCard}
-            onClick={() => void addCard('richtext')}
-          >
-            文本卡片
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => void addCard('code')}
-            title="新建代码卡片"
-          >
-            代码卡片
-          </Button>
-          {hiddenCount > 0 && (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center p-3">
+          <div className="pointer-events-auto flex items-center gap-1 rounded-xl border border-line/70 bg-elevated/95 p-1.5 shadow-panel backdrop-blur">
             <Button
               size="sm"
-              variant="ghost"
-              icon={<Undo2 size={14} />}
-              onClick={restoreHidden}
-              title="恢复在本画布隐藏的卡片"
+              variant="primary"
+              icon={<Plus size={14} />}
+              loading={addingCard}
+              onClick={() => void addCard('richtext')}
             >
-              恢复隐藏 ({hiddenCount})
+              文本卡片
             </Button>
-          )}
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<Focus size={14} />}
-            onClick={() => editorRef.current?.zoomToFit()}
-          >
-            适应视图
-          </Button>
-          <div ref={settingsWrapperRef} className="relative">
             <Button
               size="sm"
-              variant={settingsOpen ? 'secondary' : 'ghost'}
-              icon={<SlidersHorizontal size={14} />}
-              aria-label="画布设置"
-              title="画布设置"
-              aria-expanded={settingsOpen}
-              aria-haspopup="dialog"
-              onClick={toggleSettings}
-            />
-            {settingsOpen && (
-              <CanvasSettingsPanel
-                preferences={preferences}
-                onChange={updatePreferences}
-                onClose={() => setSettingsOpen(false)}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-
-      {selected.length > 0 && !settingsOpen && (
-        <div className="pointer-events-none absolute inset-x-0 top-16 z-20 flex justify-center">
-          <div className="pointer-events-auto flex items-center gap-1 rounded-lg border border-line bg-elevated/95 p-1 shadow-sm backdrop-blur">
-            <span className="px-2 text-[11.5px] text-faint">已选 {selected.length} 张</span>
-            {selected.length === 1 && (
+              variant="secondary"
+              onClick={() => void addCard('code')}
+              title="新建代码卡片"
+            >
+              代码卡片
+            </Button>
+            {hiddenCount > 0 && (
               <Button
                 size="sm"
-                variant="secondary"
-                icon={<SquarePen size={13} />}
-                onClick={() => {
-                  const item = selected[0]
-                  openEditorForShape(item.shapeId, item.blockId)
-                }}
+                variant="ghost"
+                icon={<Undo2 size={14} />}
+                onClick={restoreHidden}
+                title="恢复在本画布隐藏的卡片"
               >
-                编辑
+                恢复隐藏 ({hiddenCount})
               </Button>
             )}
+            <span className="mx-0.5 h-4 w-px bg-line" aria-hidden />
             <Button
               size="sm"
               variant="ghost"
-              icon={<Eye size={13} />}
-              onClick={hideSelected}
-              title="只从画布隐藏，纸张内容保留"
+              icon={<Focus size={14} />}
+              onClick={() => editorRef.current?.zoomToFit()}
             >
-              隐藏
+              适应视图
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<Trash2 size={13} />}
-              className="text-danger hover:bg-danger-soft"
-              onClick={() => setConfirmDelete(true)}
-            >
-              删除内容
-            </Button>
+            <div ref={settingsWrapperRef} className="relative">
+              <Button
+                size="sm"
+                variant={settingsOpen ? 'secondary' : 'ghost'}
+                icon={<SlidersHorizontal size={14} />}
+                aria-label="画布设置"
+                title="画布设置"
+                aria-expanded={settingsOpen}
+                aria-haspopup="dialog"
+                onClick={toggleSettings}
+              />
+              {settingsOpen && (
+                <CanvasSettingsPanel
+                  preferences={preferences}
+                  onChange={updatePreferences}
+                  onClose={() => setSettingsOpen(false)}
+                />
+              )}
+            </div>
           </div>
         </div>
-      )}
 
-      {editing && (
-        <CardEditorOverlay
-          blockId={editing.blockId}
-          rect={editing.rect}
-          onClose={closeEditor}
-        />
-      )}
+        {selected.length > 0 && !settingsOpen && (
+          <div className="pointer-events-none absolute inset-x-0 top-16 z-20 flex justify-center">
+            <div className="pointer-events-auto flex items-center gap-1 rounded-xl border border-line/70 bg-elevated/95 p-1.5 shadow-panel backdrop-blur">
+              <span className="px-2 text-[11.5px] text-faint">已选 {selected.length} 张</span>
+              {selected.length === 1 && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  icon={<SquarePen size={13} />}
+                  onClick={() => {
+                    const item = selected[0]
+                    openEditorForShape(item.shapeId, item.blockId)
+                  }}
+                >
+                  编辑
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<Eye size={13} />}
+                onClick={hideSelected}
+                title="只从画布隐藏，纸张内容保留"
+              >
+                隐藏
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<Trash2 size={13} />}
+                className="text-danger hover:bg-danger-soft"
+                onClick={() => setConfirmDelete(true)}
+              >
+                删除内容
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {editing && (
+          <CardEditorOverlay
+            blockId={editing.blockId}
+            rect={editing.rect}
+            onClose={closeEditor}
+          />
+        )}
+      </div>
 
       <Dialog
         open={confirmDelete}

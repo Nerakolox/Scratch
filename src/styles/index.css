@@ -26,49 +26,76 @@
   --color-success: var(--scratch-success);
   --color-warning: var(--scratch-warning);
 
-  --radius-card: 10px;
+  /* Corner system: panel 18 / floating + card 16 / control 12 / small 10.
+     Containers keep inner padding close to their radius; nested bars keep
+     inner radius = outer radius − inset so the corners stay concentric. */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 28px;
+  --radius-card: 16px;
+  --radius-panel: 18px;
+  --radius-sheet: 16px;
+
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-panel: var(--scratch-shadow-panel);
+  --shadow-sheet: var(--scratch-shadow-sheet);
 }
 
 :root {
   color-scheme: light;
-  --scratch-canvas: #f7f6f3;
-  --scratch-surface: #fffefc;
-  --scratch-sunken: #efede7;
-  --scratch-elevated: #ffffff;
-  --scratch-line: #e6e2da;
-  --scratch-line-strong: #d4cfc4;
-  --scratch-ink: #23241f;
-  --scratch-muted: #5f605a;
-  --scratch-faint: #8c8c83;
+  /* 玉白纸：极淡青绿灰，像宣纸/玉版纸，温润不泛黄 */
+  /* 三层深度：桌面（canvas）→ 面板（surface）→ 纸面（elevated） */
+  --scratch-canvas: #e6e9dd;
+  --scratch-surface: #f6f7f1;
+  --scratch-sunken: #eaede3;
+  --scratch-elevated: #fcfdf9;
+  --scratch-line: #dee1d6;
+  --scratch-line-strong: #c9cec0;
+  --scratch-ink: #22251e;
+  --scratch-muted: #5a5f53;
+  --scratch-faint: #767b6e;
   --scratch-accent: #4d59d8;
   --scratch-accent-ink: #ffffff;
-  --scratch-accent-soft: #eceeff;
+  --scratch-accent-soft: #e7eafb;
   --scratch-danger: #b23b34;
-  --scratch-danger-soft: #fbeceb;
+  --scratch-danger-soft: #f8e9e6;
   --scratch-success: #2c7a58;
   --scratch-warning: #8a6318;
-  --scratch-shadow: 0 1px 2px rgb(35 36 31 / 0.04), 0 8px 24px rgb(35 36 31 / 0.05);
+  --scratch-shadow: 0 1px 2px rgb(30 33 26 / 0.04), 0 8px 24px rgb(30 33 26 / 0.06);
+  --scratch-shadow-panel:
+    0 1px 2px rgb(30 33 26 / 0.05), 0 12px 32px -16px rgb(30 33 26 / 0.22);
+  --scratch-shadow-sheet:
+    0 1px 2px rgb(30 33 26 / 0.04), 0 16px 40px -24px rgb(30 33 26 / 0.18);
 }
 
 [data-theme='dark'] {
   color-scheme: dark;
-  --scratch-canvas: #161719;
-  --scratch-surface: #1d1e21;
-  --scratch-sunken: #232428;
-  --scratch-elevated: #24252a;
-  --scratch-line: #2e2f34;
-  --scratch-line-strong: #3d3e44;
-  --scratch-ink: #e9e7e1;
-  --scratch-muted: #a5a59d;
-  --scratch-faint: #74746d;
+  /* 夜墨纸：深色模式沿用同一条青绿灰轴，避免偏蓝 */
+  --scratch-canvas: #121310;
+  --scratch-surface: #1b1c18;
+  --scratch-sunken: #232520;
+  --scratch-elevated: #262822;
+  --scratch-line: #2e302b;
+  --scratch-line-strong: #3e4139;
+  --scratch-ink: #eae9e1;
+  --scratch-muted: #a6a69d;
+  --scratch-faint: #7b7d73;
   --scratch-accent: #8b93ff;
   --scratch-accent-ink: #16171d;
-  --scratch-accent-soft: #272a45;
+  --scratch-accent-soft: #26293f;
   --scratch-danger: #e37c74;
   --scratch-danger-soft: #3a2323;
   --scratch-success: #71c39d;
   --scratch-warning: #d8ac62;
   --scratch-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.35);
+  --scratch-shadow-panel:
+    0 1px 2px rgb(0 0 0 / 0.4), 0 16px 40px -20px rgb(0 0 0 / 0.6);
+  --scratch-shadow-sheet:
+    0 1px 2px rgb(0 0 0 / 0.35), 0 20px 48px -28px rgb(0 0 0 / 0.7);
 }
 
 @layer base {
@@ -143,9 +170,145 @@
   }
 }
 
+/* ---------- Continuous (Apple-style) corners ---------- */
+/* Chrome 139+/Edge 139+ support superellipse corners. Pills, dots and circles
+   stay truly round; every other rounded rectangle gets continuous curvature. */
+@supports (corner-shape: squircle) {
+  *,
+  ::before,
+  ::after {
+    corner-shape: squircle;
+  }
+
+  .rounded-full,
+  .scratch-block-card__label::before,
+  ::-webkit-scrollbar-thumb,
+  .tlui-slider__thumb,
+  .tlui-help-menu,
+  .tlui-people-menu__avatar {
+    corner-shape: round;
+  }
+}
+
+/* ---------- Motion ---------- */
+
+/* Restrained, consistent entries: fade plus a short lift or scale, no bounce.
+   Everything is disabled by the reduced-motion rule above. */
+@keyframes scratch-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scratch-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes scratch-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes scratch-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.motion-fade {
+  animation: scratch-fade-in 160ms var(--ease-standard) backwards;
+}
+
+.motion-fade-delayed {
+  animation: scratch-fade-in 160ms var(--ease-standard) 90ms backwards;
+}
+
+.motion-view {
+  animation: scratch-fade-in 220ms var(--ease-standard) backwards;
+}
+
+.motion-panel {
+  animation: scratch-panel-in 240ms var(--ease-smooth) backwards;
+}
+
+.motion-menu {
+  animation: scratch-menu-in 160ms var(--ease-smooth) backwards;
+}
+
+.motion-toast {
+  animation: scratch-toast-in 220ms var(--ease-smooth) backwards;
+}
+
+/* ---------- Deletion ghost ---------- */
+
+@keyframes scratch-type-out {
+  from {
+    opacity: 0.85;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translateY(-2px);
+  }
+}
+
+/* Fixed to the viewport on purpose: the ghost must not depend on any ancestor's
+   positioning context, and its font metrics are copied inline from the editor
+   so it lands on the exact line and column the deleted text occupied. */
+.scratch-type-ghost {
+  position: fixed;
+  /* Above the card editor overlay (80), below modal dialogs (100). */
+  z-index: 90;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  user-select: none;
+  white-space: pre;
+  text-rendering: optimizeSpeed;
+  animation: scratch-type-out 240ms var(--ease-standard) both;
+}
+
+/* ---------- Brand artwork ---------- */
+
+/* Transparent logo, no tile: in dark mode flip the ink so the pen stays
+   visible while the indigo stroke keeps its hue. */
+.brand-image {
+  transition:
+    filter 200ms var(--ease-standard),
+    opacity 200ms var(--ease-standard);
+}
+
+[data-theme='dark'] .brand-image {
+  filter: invert(1) hue-rotate(180deg) brightness(1.5);
+}
+
 /* ---------- Paper prose ---------- */
 
 .scratch-prose .tiptap {
+  position: relative;
   outline: none;
   min-height: 55vh;
   font-size: 16px;
@@ -256,15 +419,15 @@
   font-size: 0.86em;
   background: var(--scratch-sunken);
   border: 1px solid var(--scratch-line);
-  border-radius: 5px;
+  border-radius: 6px;
   padding: 0.1em 0.35em;
 }
 
 .scratch-prose pre {
   background: var(--scratch-sunken);
   border: 1px solid var(--scratch-line);
-  border-radius: 10px;
-  padding: 0.9em 1.1em;
+  border-radius: 14px;
+  padding: 1em 1.2em;
   overflow-x: auto;
   margin: 0.9em 0;
   font-family: var(--font-mono);
@@ -282,7 +445,7 @@
 .scratch-prose img {
   max-width: 100%;
   height: auto;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid var(--scratch-line);
 }
 
@@ -296,7 +459,7 @@
 
 .scratch-prose .ProseMirror-selectednode {
   outline: 2px solid var(--scratch-accent);
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 /* highlight.js tokens (lowlight) */
@@ -356,6 +519,63 @@
 
 /* ---------- Canvas ---------- */
 
+/* Align tldraw's chrome with Scratch: same paper palette, indigo accent,
+   radii, type and elevation as the rest of the app. */
+.tl-container.tl-theme__light,
+.tl-container.tl-theme__dark {
+  --tl-font-sans: var(--font-sans);
+  --tl-font-mono: var(--font-mono);
+  --tl-radius-0: 6px;
+  --tl-radius-1: 8px;
+  --tl-radius-2: 10px;
+  --tl-radius-3: 14px;
+  --tl-radius-4: 18px;
+  --tl-color-selection-fill: color-mix(in srgb, var(--scratch-accent) 18%, transparent);
+  --tl-color-selection-stroke: var(--scratch-accent);
+  --tl-color-selected: var(--scratch-accent);
+  --tl-color-selected-contrast: var(--scratch-accent-ink);
+  --tl-color-focus: var(--scratch-accent);
+  --tl-color-primary: var(--scratch-accent);
+  --tl-color-low: var(--scratch-surface);
+  --tl-color-low-border: var(--scratch-line);
+  --tl-color-muted-0: color-mix(in srgb, var(--scratch-ink) 2%, transparent);
+  --tl-color-muted-1: color-mix(in srgb, var(--scratch-ink) 10%, transparent);
+  --tl-color-muted-2: color-mix(in srgb, var(--scratch-ink) 4%, transparent);
+  --tl-color-hint: color-mix(in srgb, var(--scratch-ink) 5.5%, transparent);
+  --tl-color-overlay: color-mix(in srgb, var(--scratch-ink) 25%, transparent);
+  --tl-color-divider: var(--scratch-line);
+  --tl-color-panel: var(--scratch-elevated);
+  --tl-color-panel-contrast: var(--scratch-elevated);
+  --tl-color-panel-overlay: color-mix(in srgb, var(--scratch-elevated) 85%, transparent);
+  --tl-color-panel-transparent: transparent;
+  --tl-color-text: var(--scratch-ink);
+  --tl-color-text-0: var(--scratch-ink);
+  --tl-color-text-1: var(--scratch-ink);
+  --tl-color-text-2: var(--scratch-muted);
+  --tl-color-text-3: var(--scratch-muted);
+  --tl-color-text-disabled: var(--scratch-faint);
+  --tl-color-text-shadow: var(--scratch-elevated);
+  --tl-color-tooltip: var(--scratch-ink);
+  --tl-color-success: var(--scratch-success);
+  --tl-color-info: var(--scratch-accent);
+  --tl-color-warning: var(--scratch-warning);
+  --tl-color-danger: var(--scratch-danger);
+  --tl-shadow-1: var(--scratch-shadow);
+  --tl-shadow-2: var(--scratch-shadow-panel);
+  --tl-shadow-3: var(--scratch-shadow-panel);
+  --tl-shadow-4: var(--scratch-shadow-panel);
+}
+
+.tl-container.tl-theme__light {
+  --tl-color-background: var(--scratch-sunken);
+  --tl-color-grid: #d8dccf;
+}
+
+.tl-container.tl-theme__dark {
+  --tl-color-background: var(--scratch-canvas);
+  --tl-color-grid: #2f322b;
+}
+
 .scratch-canvas-shell {
   position: absolute;
   inset: 0;
@@ -367,39 +587,76 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
-  border-radius: 10px;
-  background: var(--scratch-surface);
+  border-radius: 16px;
+  background: var(--scratch-elevated);
   border: 1px solid var(--scratch-line);
-  box-shadow: var(--scratch-shadow);
+  box-shadow: var(--scratch-shadow-sheet);
   overflow: hidden;
   color: var(--scratch-ink);
+  transition: box-shadow 150ms ease;
+}
+
+.scratch-block-card:hover {
+  box-shadow: var(--scratch-shadow-panel);
 }
 
 .scratch-block-card[data-kind='code'] {
-  background: var(--scratch-sunken);
+  background: var(--scratch-surface);
 }
 
 .scratch-block-card__label {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px 0;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  padding: 10px 16px 0;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   color: var(--scratch-faint);
   user-select: none;
+}
+
+.scratch-block-card__label::before {
+  content: '';
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--scratch-accent);
+}
+
+.scratch-block-card[data-kind='code'] .scratch-block-card__label::before {
+  background: var(--scratch-success);
+}
+
+.scratch-block-card[data-kind='image'] .scratch-block-card__label::before {
+  background: var(--scratch-warning);
+}
+
+.scratch-block-card__hint {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.scratch-block-card:hover .scratch-block-card__hint,
+.scratch-block-card:focus-within .scratch-block-card__hint {
+  opacity: 1;
 }
 
 .scratch-block-card__body {
   flex: 1;
   min-height: 0;
-  padding: 6px 14px 14px;
+  padding: 10px 16px 18px;
   overflow: hidden;
-  font-size: 13.5px;
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.scratch-block-card[data-kind='code'] .scratch-block-card__body {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
 }
 
 .scratch-block-card__body h1,
@@ -456,7 +713,7 @@
 .scratch-block-card__body img {
   max-width: 100%;
   max-height: 100%;
-  border-radius: 6px;
+  border-radius: 10px;
   object-fit: contain;
 }
 .scratch-block-card__empty {
@@ -470,30 +727,19 @@
   z-index: 80;
   display: flex;
   flex-direction: column;
-  background: var(--scratch-surface);
-  border: 1px solid var(--scratch-accent);
-  border-radius: 10px;
-  box-shadow: var(--scratch-shadow);
+  background: var(--scratch-elevated);
+  border: 1px solid color-mix(in srgb, var(--scratch-accent) 42%, var(--scratch-line));
+  border-radius: 16px;
+  box-shadow: var(--scratch-shadow-panel);
   overflow: hidden;
-}
-.scratch-card-editor__bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--scratch-line);
-  font-size: 11px;
-  color: var(--scratch-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 .scratch-card-editor__content {
   flex: 1;
   overflow: auto;
-  padding: 10px 14px;
+  padding: 12px 16px;
 }
 .scratch-card-editor__content .tiptap {
+  position: relative;
   outline: none;
   min-height: 120px;
   font-size: 14px;
@@ -516,7 +762,7 @@
 }
 .scratch-card-editor__content .tiptap pre {
   background: var(--scratch-sunken);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 0.75em 1em;
   font-family: var(--font-mono);
   font-size: 12.5px;
@@ -526,7 +772,7 @@
   font-family: var(--font-mono);
   font-size: 0.88em;
   background: var(--scratch-sunken);
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 0.1em 0.3em;
 }
 .scratch-card-editor__content .tiptap blockquote {
@@ -540,7 +786,7 @@
 .scratch-codeblock {
   margin: 0.9em 0;
   border: 1px solid var(--scratch-line);
-  border-radius: 10px;
+  border-radius: 14px;
   overflow: hidden;
   background: var(--scratch-sunken);
 }
@@ -550,7 +796,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 3px 8px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--scratch-line);
   background: color-mix(in srgb, var(--scratch-surface) 55%, transparent);
 }
@@ -560,8 +806,8 @@
   background: transparent;
   color: var(--scratch-muted);
   font-size: 11.5px;
-  padding: 2px 4px;
-  border-radius: 4px;
+  padding: 3px 6px;
+  border-radius: 6px;
   max-width: 55%;
 }
 
@@ -569,8 +815,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border-radius: 4px;
-  padding: 2px 6px;
+  border-radius: 6px;
+  padding: 3px 8px;
   font-size: 11px;
   color: var(--scratch-muted);
 }
@@ -587,7 +833,7 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  padding: 0.85em 1.05em;
+  padding: 1em 1.2em;
   overflow-x: auto;
   font-size: 13.5px;
 }

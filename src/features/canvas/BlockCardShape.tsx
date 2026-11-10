@@ -205,7 +205,9 @@ export function BlockCardPreview({ blockId }: { blockId: string }) {
     <div className="scratch-block-card" data-kind={block.kind}>
       <div className="scratch-block-card__label">
         <span>{kindLabel(block.kind)}</span>
-        <span className="ml-auto normal-case tracking-normal text-faint/80">双击编辑</span>
+        <span className="scratch-block-card__hint ml-auto normal-case tracking-normal text-faint">
+          双击编辑
+        </span>
       </div>
       <div className="scratch-block-card__body">
         {hasContent ? (

@@ -27,7 +27,7 @@ export function applyResolvedTheme(resolved: ResolvedTheme): void {
   if (typeof document === 'undefined') return
   document.documentElement.dataset.theme = resolved
   const meta = document.querySelector('meta[name="theme-color"]')
-  if (meta) meta.setAttribute('content', resolved === 'dark' ? '#161719' : '#f7f6f3')
+  if (meta) meta.setAttribute('content', resolved === 'dark' ? '#121310' : '#e6e9dd')
 }
 
 interface ThemeState {

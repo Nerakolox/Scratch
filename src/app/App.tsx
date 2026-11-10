@@ -6,6 +6,7 @@ import { WorkspacePage } from './WorkspacePage'
 import { SettingsPage } from './SettingsPage'
 import { Toaster } from '@/shared/toast'
 import { resolveTheme, useThemeStore } from '@/shared/theme'
+import { useWritingFavicon } from '@/shared/useWritingFavicon'
 
 function ThemeEffect() {
   const pref = useThemeStore((state) => state.pref)
@@ -14,7 +15,7 @@ function ThemeEffect() {
     const apply = () => {
       document.documentElement.dataset.theme = resolveTheme(pref)
       const meta = document.querySelector('meta[name="theme-color"]')
-      if (meta) meta.setAttribute('content', resolveTheme(pref) === 'dark' ? '#161719' : '#f7f6f3')
+      if (meta) meta.setAttribute('content', resolveTheme(pref) === 'dark' ? '#121310' : '#e6e9dd')
     }
     apply()
     if (pref !== 'system' || !media) return
@@ -25,6 +26,8 @@ function ThemeEffect() {
 }
 
 export default function App() {
+  useWritingFavicon()
+
   return (
     <ErrorBoundary>
       <HashRouter>

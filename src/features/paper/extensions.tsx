@@ -211,11 +211,11 @@ function AssetImageView({ node, selected }: NodeViewProps) {
           className={selected ? 'rounded border-2 border-accent' : 'rounded border border-line'}
         />
       ) : state === 'loading' ? (
-        <span className="flex items-center gap-2 rounded border border-line bg-sunken px-3 py-2 text-[12px] text-faint">
+        <span className="flex items-center gap-2 rounded-lg border border-line bg-sunken px-3 py-2 text-[12px] text-faint">
           <Loader2 size={13} className="animate-spin" /> 正在载入图片…
         </span>
       ) : (
-        <span className="flex items-center gap-2 rounded border border-dashed border-line px-3 py-2 text-[12px] text-faint">
+        <span className="flex items-center gap-2 rounded-lg border border-dashed border-line px-3 py-2 text-[12px] text-faint">
           <ImageOff size={13} /> 图片资源缺失（可能来自不完整的备份）
         </span>
       )}

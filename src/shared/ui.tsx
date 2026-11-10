@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import clsx from 'clsx'
 import { Loader2, X } from 'lucide-react'
@@ -44,7 +44,7 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       className={clsx(
-        'inline-flex select-none items-center justify-center whitespace-nowrap font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50',
+        'inline-flex select-none items-center justify-center whitespace-nowrap font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-150 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-50',
         VARIANTS[variant],
         SIZES[size],
         className,
@@ -78,7 +78,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={clsx(
-        'inline-flex items-center justify-center rounded-md text-muted transition-colors duration-150 hover:bg-sunken hover:text-ink disabled:opacity-40',
+        'inline-flex items-center justify-center rounded-md text-muted transition-[color,background-color,transform] duration-150 hover:bg-sunken hover:text-ink active:scale-[0.96] disabled:opacity-40',
         size === 'sm' ? 'h-7 w-7' : 'h-8 w-8',
         active && 'bg-sunken text-ink',
         className,
@@ -101,12 +101,39 @@ export function SegmentedControl<T extends string>({
   onChange: (value: T) => void
   ariaLabel: string
 }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [indicator, setIndicator] = useState({ left: 0, width: 0, ready: false })
+
+  useLayoutEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+    const measure = () => {
+      const active = container.querySelector<HTMLElement>('[data-active="true"]')
+      if (!active) return
+      setIndicator({ left: active.offsetLeft, width: active.offsetWidth, ready: true })
+    }
+    measure()
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(measure)
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [value])
+
   return (
     <div
+      ref={containerRef}
       role="tablist"
       aria-label={ariaLabel}
-      className="inline-flex items-center rounded-lg border border-line bg-sunken/70 p-0.5"
+      className="relative inline-flex items-center rounded-lg border border-line bg-sunken/70 p-0.5"
     >
+      <span
+        aria-hidden
+        className={clsx(
+          'pointer-events-none absolute inset-y-0.5 left-0 rounded-md bg-surface shadow-sm',
+          indicator.ready && 'transition-[transform,width] duration-300 ease-smooth',
+        )}
+        style={{ width: indicator.width, transform: `translateX(${indicator.left}px)` }}
+      />
       {options.map((option) => {
         const active = option.value === value
         return (
@@ -115,12 +142,11 @@ export function SegmentedControl<T extends string>({
             type="button"
             role="tab"
             aria-selected={active}
+            data-active={active}
             onClick={() => onChange(option.value)}
             className={clsx(
-              'inline-flex h-7 items-center gap-1.5 rounded-md px-3 text-[12.5px] font-medium transition-colors duration-150',
-              active
-                ? 'bg-surface text-ink shadow-sm'
-                : 'text-muted hover:text-ink',
+              'relative z-10 inline-flex h-7 items-center gap-1.5 rounded-md px-3 text-[12.5px] font-medium transition-colors duration-200',
+              active ? 'text-ink' : 'text-muted hover:text-ink',
             )}
           >
             {option.icon}
@@ -129,6 +155,48 @@ export function SegmentedControl<T extends string>({
         )
       })}
     </div>
+  )
+}
+
+export function Switch({
+  checked,
+  onChange,
+  label,
+  description,
+  disabled = false,
+}: {
+  checked: boolean
+  onChange: (checked: boolean) => void
+  label: ReactNode
+  description?: ReactNode
+  disabled?: boolean
+}) {
+  return (
+    <label className="flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-sunken/60">
+      <span className="relative mt-0.5 inline-flex h-5 w-9 shrink-0 items-center">
+        <input
+          type="checkbox"
+          checked={checked}
+          disabled={disabled}
+          onChange={(event) => onChange(event.target.checked)}
+          className="peer absolute inset-0 z-10 m-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none h-5 w-9 rounded-full bg-line-strong transition-colors peer-checked:bg-accent peer-focus-visible:ring-2 peer-focus-visible:ring-accent/30 peer-disabled:opacity-50"
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-0.5 h-4 w-4 rounded-full bg-elevated shadow-sm transition-transform peer-checked:translate-x-4"
+        />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-[12.5px] font-medium text-ink">{label}</span>
+        {description && (
+          <span className="block text-[11px] leading-relaxed text-faint">{description}</span>
+        )}
+      </span>
+    </label>
   )
 }
 
@@ -170,9 +238,29 @@ export function Dialog({
   const panelRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef(onClose)
   closeRef.current = onClose
+  const [rendered, setRendered] = useState(open)
+  const [shown, setShown] = useState(false)
 
   useEffect(() => {
-    if (!open) return
+    if (open) {
+      setRendered(true)
+      return
+    }
+    setShown(false)
+    const timer = window.setTimeout(() => setRendered(false), 160)
+    return () => window.clearTimeout(timer)
+  }, [open])
+
+  // Wait for the closed-state commit, then flip to open on the next frame so
+  // the browser has a starting opacity/transform to transition from.
+  useEffect(() => {
+    if (!open || !rendered) return
+    const frame = requestAnimationFrame(() => setShown(true))
+    return () => cancelAnimationFrame(frame)
+  }, [open, rendered])
+
+  useEffect(() => {
+    if (!open || !rendered) return
     const previous = document.activeElement as HTMLElement | null
     const frame = requestAnimationFrame(() => panelRef.current?.focus())
     function handleKey(event: KeyboardEvent) {
@@ -202,11 +290,16 @@ export function Dialog({
       document.removeEventListener('keydown', handleKey)
       previous?.focus?.()
     }
-  }, [open])
+  }, [open, rendered])
 
-  if (!open) return null
+  if (!rendered) return null
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div
+      className={clsx(
+        'fixed inset-0 z-[100] flex items-center justify-center p-4 transition-opacity duration-150 ease-standard',
+        shown ? 'opacity-100' : 'opacity-0',
+      )}
+    >
       <div
         className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
         onClick={onClose}
@@ -219,7 +312,8 @@ export function Dialog({
         aria-labelledby={titleId}
         tabIndex={-1}
         className={clsx(
-          'relative flex w-full flex-col rounded-xl border border-line bg-elevated shadow-xl outline-none',
+          'relative flex w-full flex-col rounded-xl border border-line bg-elevated shadow-xl outline-none transition-[opacity,transform,translate,scale] duration-200 ease-smooth',
+          shown ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-1.5 scale-[0.985] opacity-0',
           width,
         )}
       >
@@ -235,7 +329,7 @@ export function Dialog({
           </IconButton>
         </div>
         {children && <div className="px-5 py-4 text-[13.5px] text-ink">{children}</div>}
-        {footer && <div className="flex justify-end gap-2 border-t border-line px-5 py-3.5">{footer}</div>}
+        {footer && <div className="flex justify-end gap-2 rounded-b-xl bg-sunken/40 px-5 py-3.5">{footer}</div>}
       </div>
     </div>,
     document.body,

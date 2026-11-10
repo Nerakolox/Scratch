@@ -10,6 +10,7 @@ import { Check, PencilLine } from 'lucide-react'
 import type { TipTapNode } from '@/core/models/types'
 import { useDocumentService, useServiceState } from '@/features/workspace/WorkspaceContext'
 import { AssetImage, BlockIds, CodeBlockWithTools } from '@/features/paper/extensions'
+import { DeletionGhost } from '@/features/paper/deletion-ghost'
 import { markdownToHtml, shouldConvertMarkdownClipboard } from '@/features/paper/markdown-paste'
 import { Button } from '@/shared/ui'
 
@@ -76,6 +77,7 @@ export function CardEditorOverlay({
         TableKit.configure({ table: { resizable: false } }),
         AssetImage.configure({ allowBase64: true }),
         BlockIds,
+        DeletionGhost,
       ],
       content: {
         type: 'doc',
@@ -168,13 +170,13 @@ export function CardEditorOverlay({
   return (
     <div
       ref={panelRef}
-      className="scratch-card-editor"
+      className="scratch-card-editor motion-panel"
       style={{ left: rect.left, top: rect.top, width: rect.width, height: rect.height }}
       role="dialog"
       aria-label="编辑卡片内容"
     >
-      <div className="scratch-card-editor__bar">
-        <span className="inline-flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-2 px-4 py-2.5">
+        <span className="inline-flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.07em] text-muted">
           <PencilLine size={12} aria-hidden />
           编辑卡片
         </span>
@@ -189,7 +191,7 @@ export function CardEditorOverlay({
           <p className="text-[13px] text-faint">这个块已被删除。</p>
         )}
       </div>
-      <div className="border-t border-line px-3 py-1.5 text-[10.5px] text-faint">
+      <div className="bg-sunken/40 px-4 py-2.5 text-[10.5px] text-faint">
         Esc 或 ⌘/Ctrl + Enter 完成 · 单击卡片外部也会保存
       </div>
     </div>

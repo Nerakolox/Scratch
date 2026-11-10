@@ -55,6 +55,14 @@ export function WorkspacePage() {
       } else if (mod && event.key.toLocaleLowerCase() === 'n') {
         event.preventDefault()
         void service.createScratch().catch(() => toast('新建草稿失败', 'error'))
+      } else if (mod && event.key.toLocaleLowerCase() === 's') {
+        event.preventDefault()
+        void service
+          .flush()
+          .then(() => toast('已保存到本地', 'success'))
+          .catch((error: unknown) =>
+            toast(error instanceof Error ? error.message : '保存失败', 'error'),
+          )
       }
     }
     window.addEventListener('keydown', onKey)
@@ -66,76 +74,77 @@ export function WorkspacePage() {
   }, [isMobile])
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-canvas">
-      <TopBar
-        sidebarCollapsed={collapsed}
-        onToggleSidebar={toggleSidebar}
-        onOpenSearch={() => setPaletteOpen(true)}
-      />
-      <div className="flex min-h-0 flex-1">
-        {mobileOpen && (
-          <div
-            className="fixed inset-0 z-30 bg-black/25 backdrop-blur-[1px] md:hidden"
-            onClick={() => setMobileOpen(false)}
-            aria-hidden
-          />
-        )}
+    <div className="flex h-full min-h-0 gap-2 bg-canvas p-2 md:gap-3 md:p-3">
+      {mobileOpen && (
         <div
-          className={clsx(
-            'fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 md:static md:z-auto md:translate-x-0',
-            mobileOpen ? 'translate-x-0' : '-translate-x-full',
-          )}
-        >
-          <Sidebar
-            collapsed={isMobile ? false : collapsed}
-            onToggleCollapse={toggleSidebar}
-            onOpenSearch={() => setPaletteOpen(true)}
-            onNavigate={() => setMobileOpen(false)}
-          />
-        </div>
-
-        <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-          {conflict && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-warning/30 bg-warning/10 px-4 py-2 text-[12.5px] text-ink">
-              <span className="inline-flex items-center gap-1.5 font-medium">
-                <AlertTriangle size={14} className="text-warning" aria-hidden />
-                此草稿在另一个标签页中被更新。
-              </span>
-              <span className="text-muted">你的本地改动还在，请选择如何处理。</span>
-              <div className="ml-auto flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => void service.resolveConflict('reload')}
-                >
-                  放弃本地并加载
-                </Button>
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={() => void service.resolveConflict('overwrite')}
-                >
-                  保留本地并覆盖
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <div className="relative min-h-0 flex-1">
-            {!hasScratch ? (
-              <div className="flex h-full items-center justify-center text-[13px] text-faint">
-                没有打开的草稿。
-              </div>
-            ) : mode === 'paper' ? (
-              <PaperEditor key={session.scratch!.id} />
-            ) : (
-              <Suspense fallback={<div className="flex h-full items-center justify-center"><Spinner label="正在打开画布…" /></div>}>
-                <CanvasView key={session.scratch!.id} />
-              </Suspense>
-            )}
-          </div>
-        </main>
+          className="fixed inset-0 z-30 bg-black/25 backdrop-blur-[1px] motion-fade md:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden
+        />
+      )}
+      <div
+        className={clsx(
+          'fixed bottom-2 left-2 top-2 z-40 transform transition-transform duration-300 ease-smooth md:static md:bottom-auto md:left-auto md:top-auto md:z-auto md:translate-x-0',
+          mobileOpen ? 'translate-x-0' : '-translate-x-[calc(100%+0.5rem)]',
+        )}
+      >
+        <Sidebar
+          collapsed={isMobile ? false : collapsed}
+          onToggleCollapse={toggleSidebar}
+          onOpenSearch={() => setPaletteOpen(true)}
+          onNavigate={() => setMobileOpen(false)}
+        />
       </div>
+
+      <main className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-panel bg-surface shadow-panel motion-panel">
+        <TopBar
+          onToggleSidebar={toggleSidebar}
+          onOpenSearch={() => setPaletteOpen(true)}
+        />
+
+        {conflict && (
+          <div className="mx-3 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg bg-warning/10 px-3 py-2 text-[12.5px] text-ink">
+            <span className="inline-flex items-center gap-1.5 font-medium">
+              <AlertTriangle size={14} className="text-warning" aria-hidden />
+              此草稿在另一个标签页中被更新。
+            </span>
+            <span className="text-muted">你的本地改动还在，请选择如何处理。</span>
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => void service.resolveConflict('reload')}
+              >
+                放弃本地并加载
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={() => void service.resolveConflict('overwrite')}
+              >
+                保留本地并覆盖
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div
+          key={`${mode}-${session.scratch?.id ?? 'empty'}`}
+          className="relative min-h-0 flex-1 motion-view"
+        >
+          {!hasScratch ? (
+            <div className="flex h-full items-center justify-center text-[13px] text-faint">
+              没有打开的草稿。
+            </div>
+          ) : mode === 'paper' ? (
+            <PaperEditor key={session.scratch!.id} />
+          ) : (
+            <Suspense fallback={<div className="flex h-full items-center justify-center"><Spinner label="正在打开画布…" /></div>}>
+              <CanvasView key={session.scratch!.id} />
+            </Suspense>
+          )}
+        </div>
+      </main>
 
       <SearchPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </div>

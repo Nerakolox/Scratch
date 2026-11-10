@@ -45,7 +45,7 @@ export function Toaster() {
       {items.map((item) => (
         <div
           key={item.id}
-          className="pointer-events-auto flex max-w-md items-center gap-2.5 rounded-lg border border-line bg-elevated px-3.5 py-2.5 text-[13.5px] shadow-sm"
+          className="pointer-events-auto flex max-w-md items-center gap-2.5 rounded-lg border border-line bg-elevated px-3.5 py-2.5 text-[13.5px] shadow-sm motion-toast"
         >
           {item.tone === 'success' ? (
             <CheckCircle2 size={16} className="shrink-0 text-success" aria-hidden />
@@ -57,7 +57,7 @@ export function Toaster() {
           <span className="min-w-0 flex-1">{item.message}</span>
           <button
             type="button"
-            className="rounded p-0.5 text-faint hover:bg-sunken hover:text-ink"
+            className="rounded-md p-1 text-faint hover:bg-sunken hover:text-ink"
             onClick={() => dismiss(item.id)}
             aria-label="关闭通知"
           >
