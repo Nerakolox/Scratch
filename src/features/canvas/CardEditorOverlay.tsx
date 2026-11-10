@@ -42,11 +42,23 @@ export function CardEditorOverlay({
     if (closedRef.current) return
     closedRef.current = true
     const current = editorRef.current
-    if (current && !current.isDestroyed) {
-      const nodes = (current.getJSON() as TipTapNode).content ?? []
-      void service.replaceBlockWithNodes(blockId, nodes)
+    if (!current || current.isDestroyed) {
+      onClose()
+      return
     }
-    onClose()
+    const finish = () => {
+      if (!current.isDestroyed) {
+        const nodes = (current.getJSON() as TipTapNode).content ?? []
+        void service.replaceBlockWithNodes(blockId, nodes)
+      }
+      onClose()
+    }
+    // Commit any in-flight IME composition before reading the document. CI
+    // browsers can keep the last piece of a CJK input in composition when a
+    // button is clicked immediately after typing.
+    const composing = current.view.composing
+    current.view.dom.blur()
+    window.setTimeout(finish, composing ? 60 : 0)
   }, [blockId, onClose, service])
 
   const editor = useEditor(

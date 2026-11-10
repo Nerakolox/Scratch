@@ -29,11 +29,13 @@ test('paper writing syncs to canvas, edits there, and survives reload', async ({
   )
   const overlay = page.locator('.scratch-card-editor')
   await expect(overlay).toBeVisible()
+  await expect(page.locator('.tl-text-shape')).toHaveCount(0)
   await overlay.locator('.tiptap').click()
   await page.keyboard.press('End')
   await page.keyboard.type('（画布补充）')
   await overlay.getByRole('button', { name: '完成' }).click()
   await expect(overlay).toBeHidden()
+  await expect(page.locator('.tl-text-shape')).toHaveCount(0)
   await expect(cards.filter({ hasText: '（画布补充）' })).toHaveCount(1)
 
   await page.getByRole('tab', { name: '纸张' }).click()

@@ -502,6 +502,7 @@ export default function CanvasView() {
           licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
           shapeUtils={[BlockCardShapeUtil]}
           onMount={handleMount}
+          options={{ createTextOnCanvasDoubleClick: false }}
           components={componentOverrides}
         />
       </div>

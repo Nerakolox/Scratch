@@ -246,10 +246,12 @@ export class BlockCardShapeUtil extends BaseBoxShapeUtil<BlockCardShape> {
   }
 
   override onDoubleClick(shape: BlockCardShape) {
-    window.dispatchEvent(
-      new CustomEvent(EDIT_CARD_EVENT, {
-        detail: { shapeId: shape.id, blockId: shape.props.blockId },
-      }),
-    )
+    const detail = { shapeId: shape.id, blockId: shape.props.blockId }
+    // Let tldraw finish its own double-click handling first; opening our
+    // editor mid-gesture let the canvas steal focus (and create a stray text
+    // shape) on slower browsers.
+    window.setTimeout(() => {
+      window.dispatchEvent(new CustomEvent(EDIT_CARD_EVENT, { detail }))
+    }, 0)
   }
 }
