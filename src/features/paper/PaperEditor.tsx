@@ -6,6 +6,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
+import { TableKit } from '@tiptap/extension-table'
 import Typography from '@tiptap/extension-typography'
 import { DragHandle } from '@tiptap/extension-drag-handle-react'
 import { common, createLowlight } from 'lowlight'
@@ -25,7 +26,7 @@ import { filterSlashCommands, type SlashCommand } from './slash-commands'
 import { Dialog, IconButton, inputClass } from '@/shared/ui'
 import { toast } from '@/shared/toast'
 import { formatRelativeTime } from '@/shared/format'
-import { looksLikeMarkdown, markdownToHtml } from './markdown-paste'
+import { markdownToHtml, shouldConvertMarkdownClipboard } from './markdown-paste'
 
 const lowlight = createLowlight(common)
 
@@ -118,8 +119,9 @@ export function PaperEditor() {
         CodeBlockWithTools.configure({ lowlight, defaultLanguage: null }),
         TaskList,
         TaskItem.configure({ nested: true }),
+        TableKit.configure({ table: { resizable: false } }),
         Typography,
-        AssetImage,
+        AssetImage.configure({ allowBase64: true }),
         BlockIds,
       ],
       content: docFromBlocks(sessionNodes),
@@ -140,9 +142,9 @@ export function PaperEditor() {
           }
           const clipboard = event.clipboardData
           if (!clipboard) return false
-          if (clipboard.getData('text/html')) return false
           const text = clipboard.getData('text/plain')
-          if (!text || !looksLikeMarkdown(text)) return false
+          const html = clipboard.getData('text/html')
+          if (!shouldConvertMarkdownClipboard(text, html)) return false
           event.preventDefault()
           editorRef.current?.chain().focus().insertContent(markdownToHtml(text)).run()
           return true

@@ -24,10 +24,22 @@ export const DEFAULT_CARD_WIDTH = 300
 export const DEFAULT_CARD_HEIGHT = 200
 export const CARD_GAP = 48
 
-function PreviewImage({ assetId, alt }: { assetId: string; alt: string }) {
+function PreviewImage({
+  assetId,
+  alt,
+  src,
+}: {
+  assetId: string
+  alt: string
+  src: string
+}) {
   const service = useDocumentService()
-  const [url, setUrl] = useState<string | null>(null)
+  const [url, setUrl] = useState<string | null>(src || null)
   useEffect(() => {
+    if (!assetId) {
+      setUrl(src || null)
+      return
+    }
     let alive = true
     service
       .getAssetUrl(assetId)
@@ -38,9 +50,11 @@ function PreviewImage({ assetId, alt }: { assetId: string; alt: string }) {
     return () => {
       alive = false
     }
-  }, [assetId, service])
+  }, [assetId, service, src])
   if (!url) return <span className="scratch-block-card__empty">图片载入中…</span>
-  return <img src={url} alt={alt} draggable={false} />
+  return (
+    <img src={url} alt={alt} loading="lazy" referrerPolicy="no-referrer" draggable={false} />
+  )
 }
 
 function renderText(node: TipTapNode, key: string): ReactNode {
@@ -79,7 +93,8 @@ function renderInline(nodes: TipTapNode[] | undefined, prefix: string): ReactNod
     if (node.type === 'image') {
       const assetId = typeof node.attrs?.assetId === 'string' ? node.attrs.assetId : ''
       const alt = typeof node.attrs?.alt === 'string' ? node.attrs.alt : ''
-      return <PreviewImage key={key} assetId={assetId} alt={alt} />
+      const src = typeof node.attrs?.src === 'string' ? node.attrs.src : ''
+      return <PreviewImage key={key} assetId={assetId} alt={alt} src={src} />
     }
     if (node.type === 'text') return renderText(node, key)
     return <span key={key}>{renderInline(node.content, key)}</span>
@@ -135,8 +150,21 @@ function renderNode(node: TipTapNode, key: string): ReactNode {
     case 'image': {
       const assetId = typeof node.attrs?.assetId === 'string' ? node.attrs.assetId : ''
       const alt = typeof node.attrs?.alt === 'string' ? node.attrs.alt : ''
-      return <PreviewImage key={key} assetId={assetId} alt={alt} />
+      const src = typeof node.attrs?.src === 'string' ? node.attrs.src : ''
+      return <PreviewImage key={key} assetId={assetId} alt={alt} src={src} />
     }
+    case 'table':
+      return (
+        <table key={key}>
+          <tbody>{renderNodes(node.content, key)}</tbody>
+        </table>
+      )
+    case 'tableRow':
+      return <tr key={key}>{renderNodes(node.content, key)}</tr>
+    case 'tableHeader':
+      return <th key={key}>{renderNodes(node.content, key)}</th>
+    case 'tableCell':
+      return <td key={key}>{renderNodes(node.content, key)}</td>
     case 'hardBreak':
       return <br key={key} />
     case 'text':

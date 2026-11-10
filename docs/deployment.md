@@ -52,7 +52,7 @@ Content-Security-Policy:
   default-src 'self';
   script-src 'self';
   style-src 'self' 'unsafe-inline';
-  img-src 'self' blob: data:;
+  img-src 'self' blob: data: https:;   # https: 允许 Markdown 外链图片；可按隐私要求收紧
   font-src 'self' data:;
   connect-src 'self'
     https://graph.microsoft.com

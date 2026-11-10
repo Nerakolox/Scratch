@@ -279,3 +279,43 @@ test('canvas settings control minimap, snap, grid, style panel and tldraw menu',
   await expect(restored.getByRole('checkbox', { name: /样式面板/ })).toBeChecked()
   await expect(restored.getByRole('checkbox', { name: /tldraw 菜单/ })).toBeChecked()
 })
+
+test('pastes Markdown when the clipboard also includes a pre-wrapped HTML copy', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('/')
+  const editor = page.locator('.tiptap')
+  await editor.click()
+
+  const pixel =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z4S8AAAAASUVORK5CYII='
+  const markdown = `# 解析标题
+
+| 名称 | 数量 |
+| --- | --- |
+| 苹果 | 2 |
+
+- [x] 已完成
+- [ ] 待办
+
+![像素](${pixel})`
+  const escaped = markdown.replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+  await page.evaluate(
+    async ({ markdown, html }) => {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/plain': new Blob([markdown], { type: 'text/plain' }),
+          'text/html': new Blob([html], { type: 'text/html' }),
+        }),
+      ])
+    },
+    { markdown, html: `<pre>${escaped}</pre>` },
+  )
+  await page.keyboard.press('ControlOrMeta+V')
+
+  await expect(page.locator('.tiptap h1')).toContainText('解析标题')
+  await expect(page.locator('.tiptap table th').first()).toContainText('名称')
+  await expect(page.locator('.tiptap table td').first()).toContainText('苹果')
+  await expect(page.locator('.tiptap input[type="checkbox"]')).toHaveCount(2)
+  await expect(page.locator('.tiptap input[type="checkbox"]').first()).toBeChecked()
+  await expect(page.locator('.tiptap img')).toBeVisible()
+})

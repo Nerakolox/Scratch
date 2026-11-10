@@ -21,6 +21,7 @@ export const TOP_LEVEL_BLOCK_TYPES = [
   'bulletList',
   'orderedList',
   'taskList',
+  'table',
   'horizontalRule',
   'image',
 ]
@@ -155,6 +156,7 @@ export const CodeBlockWithTools = CodeBlockLowlight.extend({
 function AssetImageView({ node, selected }: NodeViewProps) {
   const service = useDocumentService()
   const assetId = typeof node.attrs.assetId === 'string' ? node.attrs.assetId : null
+  const directSrc = typeof node.attrs.src === 'string' ? node.attrs.src : ''
   const alt = typeof node.attrs.alt === 'string' ? node.attrs.alt : ''
   const [url, setUrl] = useState<string | null>(null)
   const [state, setState] = useState<'loading' | 'ready' | 'missing'>('loading')
@@ -162,8 +164,16 @@ function AssetImageView({ node, selected }: NodeViewProps) {
   useEffect(() => {
     let alive = true
     if (!assetId) {
-      setState('missing')
-      return
+      if (directSrc) {
+        setUrl(directSrc)
+        setState('ready')
+      } else {
+        setUrl(null)
+        setState('missing')
+      }
+      return () => {
+        alive = false
+      }
     }
     setState('loading')
     service
@@ -183,7 +193,7 @@ function AssetImageView({ node, selected }: NodeViewProps) {
     return () => {
       alive = false
     }
-  }, [assetId, service])
+  }, [assetId, directSrc, service])
 
   return (
     <NodeViewWrapper
@@ -196,6 +206,8 @@ function AssetImageView({ node, selected }: NodeViewProps) {
         <img
           src={url}
           alt={alt}
+          loading="lazy"
+          referrerPolicy="no-referrer"
           className={selected ? 'rounded border-2 border-accent' : 'rounded border border-line'}
         />
       ) : state === 'loading' ? (

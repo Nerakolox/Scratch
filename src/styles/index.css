@@ -599,3 +599,62 @@
   padding: 0;
   font-size: inherit;
 }
+
+/* ---------- Tables (paper, cards, card editor) ---------- */
+
+.scratch-prose .tableWrapper {
+  overflow-x: auto;
+}
+
+.scratch-prose table,
+.scratch-card-editor__content .tiptap table {
+  width: 100%;
+  margin: 0.8em 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.95em;
+  overflow: hidden;
+}
+
+.scratch-prose th,
+.scratch-prose td,
+.scratch-card-editor__content .tiptap th,
+.scratch-card-editor__content .tiptap td {
+  border: 1px solid var(--scratch-line);
+  padding: 0.4em 0.6em;
+  vertical-align: top;
+  text-align: left;
+  position: relative;
+}
+
+.scratch-prose th,
+.scratch-card-editor__content .tiptap th {
+  background: var(--scratch-sunken);
+  font-weight: 600;
+}
+
+.scratch-prose th p,
+.scratch-prose td p,
+.scratch-card-editor__content .tiptap th p,
+.scratch-card-editor__content .tiptap td p {
+  margin: 0;
+}
+
+.scratch-block-card__body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+
+.scratch-block-card__body th,
+.scratch-block-card__body td {
+  border: 1px solid var(--scratch-line);
+  padding: 2px 5px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.scratch-block-card__body th {
+  background: var(--scratch-sunken);
+  font-weight: 600;
+}

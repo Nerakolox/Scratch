@@ -172,6 +172,24 @@ function blockMarkdown(node: TipTapNode, depth = 0): string {
     }
     case 'horizontalRule':
       return '---'
+    case 'table': {
+      const rows = (node.content ?? []).map((row) =>
+        (row.content ?? []).map((cell) =>
+          (cell.content ?? [])
+            .map((child) => inlineMarkdown(child))
+            .join(' ')
+            .replace(/\n+/g, ' ')
+            .replace(/\|/g, '\\|'),
+        ),
+      )
+      if (rows.length === 0) return ''
+      const [header, ...body] = rows
+      return [
+        `| ${header.join(' | ')} |`,
+        `| ${header.map(() => '---').join(' | ')} |`,
+        ...body.map((cells) => `| ${cells.join(' | ')} |`),
+      ].join('\n')
+    }
     case 'bulletList':
       return (node.content ?? [])
         .map((item) => {

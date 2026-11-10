@@ -4,12 +4,13 @@ import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
+import { TableKit } from '@tiptap/extension-table'
 import { common, createLowlight } from 'lowlight'
 import { Check, PencilLine } from 'lucide-react'
 import type { TipTapNode } from '@/core/models/types'
 import { useDocumentService, useServiceState } from '@/features/workspace/WorkspaceContext'
 import { AssetImage, BlockIds, CodeBlockWithTools } from '@/features/paper/extensions'
-import { looksLikeMarkdown, markdownToHtml } from '@/features/paper/markdown-paste'
+import { markdownToHtml, shouldConvertMarkdownClipboard } from '@/features/paper/markdown-paste'
 import { Button } from '@/shared/ui'
 
 const lowlight = createLowlight(common)
@@ -60,7 +61,8 @@ export function CardEditorOverlay({
         CodeBlockWithTools.configure({ lowlight, defaultLanguage: null }),
         TaskList,
         TaskItem.configure({ nested: true }),
-        AssetImage,
+        TableKit.configure({ table: { resizable: false } }),
+        AssetImage.configure({ allowBase64: true }),
         BlockIds,
       ],
       content: {
@@ -76,9 +78,9 @@ export function CardEditorOverlay({
         handlePaste: (_view, event) => {
           const clipboard = event.clipboardData
           if (!clipboard) return false
-          if (clipboard.getData('text/html')) return false
           const text = clipboard.getData('text/plain')
-          if (!text || !looksLikeMarkdown(text)) return false
+          const html = clipboard.getData('text/html')
+          if (!shouldConvertMarkdownClipboard(text, html)) return false
           event.preventDefault()
           editorRef.current?.chain().focus().insertContent(markdownToHtml(text)).run()
           return true

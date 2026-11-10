@@ -146,5 +146,5 @@ Dexie 数据库 `scratch-db`，v1 表：
 | --- | --- |
 | 单元 | 节点判定、标题、Markdown、ZIP 校验、加密/错误密码、篡改检测、S3 SigV4（AWS 官方向量） |
 | 集成 | DocumentService（同步/标题/删除/隐藏/回收站/替换/冲突/资源去重）、多标签广播、BackupService（上传校验、保留策略、自动备份门限、恢复前安全备份、加密） |
-| E2E | Paper 写作 → Canvas 卡片 → 双击编辑 → 回到 Paper → 刷新；导出并恢复 `.scratchbackup`；搜索/回收站；斜杠菜单/Markdown/拖拽手柄；6 轮模式切换；图片插入与画布同步；画布设置持久化 |
+| E2E | Paper 写作 → Canvas 卡片 → 双击编辑 → 回到 Paper → 刷新；导出并恢复 `.scratchbackup`；搜索/回收站；斜杠菜单/Markdown/拖拽手柄；6 轮模式切换；图片插入与画布同步；画布设置持久化；带 HTML 包装的 Markdown（表格/任务/图片）解析 |
 | 离线 | 生产构建 + Service Worker，断网后启动与编辑 |

@@ -11,6 +11,7 @@ import {
   ListOrdered,
   Minus,
   Quote,
+  Table2,
 } from 'lucide-react'
 
 export interface SlashCommand {
@@ -95,6 +96,15 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     icon: <Minus size={16} />,
     run: ({ editor }) =>
       editor.chain().focus().setHorizontalRule().createParagraphNear().run(),
+  },
+  {
+    id: 'table',
+    label: '表格',
+    hint: '3 × 3 表格',
+    keywords: ['table', 'biaoge', 'grid'],
+    icon: <Table2 size={16} />,
+    run: ({ editor }) =>
+      editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
   },
   {
     id: 'image',
