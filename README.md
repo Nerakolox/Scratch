@@ -180,6 +180,10 @@ docs/                 架构、备份格式、OAuth、部署、ADR、截图
 - PWA 只缓存应用静态资源，不缓存任何备份 Provider API 响应。
 - 浏览器无法完全防御 XSS 读取本地凭证；请保持依赖更新并考虑部署 CSP（见 [部署文档](docs/deployment.md)）。
 
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE). See [NOTICE](NOTICE) for attribution.
+
 ---
 
 Scratch · Duskbit Studio · v0.1.0 · 2026-11-10
