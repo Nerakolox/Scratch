@@ -48,8 +48,40 @@ export function shouldConvertMarkdownClipboard(text: string, html: string): bool
   }
 }
 
+/**
+ * Whole `.md` files often include YAML frontmatter and Pandoc-style page
+ * breaks. Neither belongs in the note body: drop the metadata block and turn
+ * standalone \newpage commands (outside code fences) into dividers.
+ */
+function normalizeMarkdownSource(text: string): string {
+  let source = text.replace(/^\uFEFF/, '')
+  const frontmatter = source.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)
+  if (frontmatter && /^[\w-]+:\s/m.test(frontmatter[1])) {
+    source = source.slice(frontmatter[0].length)
+  }
+  let fence: string | null = null
+  return source
+    .split(/\r?\n/)
+    .map((line) => {
+      const trimmed = line.trim()
+      const fenceMatch = trimmed.match(/^(`{3,}|~{3,})/)
+      if (fenceMatch) {
+        if (!fence) fence = fenceMatch[1][0]
+        else if (fence === fenceMatch[1][0]) fence = null
+        return line
+      }
+      if (!fence && /^\\newpage\s*$/.test(trimmed)) return '---'
+      return line
+    })
+    .join('\n')
+}
+
 export function markdownToHtml(text: string): string {
-  const raw = marked.parse(text, { async: false, gfm: true, breaks: false }) as string
+  const raw = marked.parse(normalizeMarkdownSource(text), {
+    async: false,
+    gfm: true,
+    breaks: false,
+  }) as string
   if (typeof DOMParser === 'undefined') return raw
   const document = new DOMParser().parseFromString(raw, 'text/html')
 

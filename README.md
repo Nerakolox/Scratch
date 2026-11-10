@@ -25,7 +25,7 @@ Scratch 是一个 local-first 的个人草稿应用：**纸张（Paper）** 负�
 
 ## 功能
 
-- **Paper**：H1–H3、列表、待办、引用、分隔线、表格、粗体/斜体/删除线/行内代码/链接、代码块（lowlight 高亮 + 语言选择 + 复制）、图片粘贴/拖入（存入 IndexedDB）、`/` 插入菜单、块拖拽排序、Markdown 快捷输入。粘贴 Markdown 时会自动识别带 HTML 包装的剪贴板内容，并转换表格、任务列表与图片外链。
+- **Paper**：H1–H3、列表、待办、引用、分隔线、表格、粗体/斜体/删除线/行内代码/链接、代码块（lowlight 高亮 + 语言选择 + 复制）、图片粘贴/拖入（存入 IndexedDB）、`/` 插入菜单、块拖拽排序、Markdown 快捷输入。粘贴 Markdown 时会自动识别带 HTML 包装的剪贴板内容，并转换表格、任务列表与图片外链；整份 `.md` 的 YAML frontmatter 会被忽略，Pandoc 的 `\newpage` 会转为分隔线。
 - **Canvas**：无限画布、平移缩放、自定义内容卡片、拖拽/缩放、连线、分组、框选、双击卡片编辑、从画布新建文本/代码卡片、卡片隐藏与恢复。画布右上角的**画布设置**可开关小地图、常开吸附对齐、网格背景、样式面板和 tldraw 菜单；设置保存在本机。
 - **同一份内容**：Paper 的每个顶层块与 Canvas 卡片共享稳定 `blockId`。来回切换不复制正文、不重置布局；删除画布卡片默认只隐藏内容，显式“删除内容”才会从纸张中移除。
 - **草稿管理**：新建、重命名、回收站、恢复、永久删除、标题自动取首行、`⌘/Ctrl+K` 全文搜索（标题 + 正文）、`⌘/Ctrl+N` 新建。
@@ -70,7 +70,7 @@ npm run preview
 ```bash
 npm run typecheck   # tsc -b
 npm run lint        # ESLint
-npm test            # Vitest：44 个单元/集成测试
+npm test            # Vitest：46 个单元/集成测试
 npm run build       # 生产构建 + PWA Service Worker
 npx playwright test # 9 个端到端测试（Chromium）
 npm run test:e2e:offline # 生产构建下的离线启动/编辑测试
@@ -78,7 +78,7 @@ npm run test:e2e:offline # 生产构建下的离线启动/编辑测试
 
 实际结果（2026-11-10，Node 22 / macOS）：
 
-- 单元 + 集成：**44 passed**（内容模型、备份协议/加密/篡改检测、S3 SigV4 AWS 官方向量、四类云 Provider 的 mock API 请求、DocumentService、多标签冲突、备份服务与自动备份门控）。
+- 单元 + 集成：**46 passed**（内容模型、备份协议/加密/篡改检测、S3 SigV4 AWS 官方向量、四类云 Provider 的 mock API 请求、DocumentService、多标签冲突、备份服务与自动备份门控）。
 - E2E：**9 passed**（写作与双模式闭环及刷新恢复、导出并恢复 `.scratchbackup`、搜索/回收站、斜杠菜单/Markdown 快捷输入/块拖拽手柄、6 轮模式切换稳定性、图片插入并同步到画布、粘贴 Markdown 转富文本、画布设置切换与持久化、带 HTML 包装的 Markdown（表格/任务/图片）解析）。
 - 离线 E2E：**1 passed**（生产构建 + Service Worker，断网后仍可启动和编辑）。
 

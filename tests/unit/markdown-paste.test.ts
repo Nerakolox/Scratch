@@ -52,6 +52,23 @@ describe('Markdown to Tiptap HTML', () => {
     expect(html).toContain('data-checked="false"')
   })
 
+  it('strips YAML frontmatter and converts standalone newpage commands', () => {
+    const html = markdownToHtml(
+      '---\ntitle: "文档"\nauthor: "作者"\n---\n\n# 标题\n\n正文\n\n\\newpage\n\n## 第二节',
+    )
+    expect(html).not.toContain('title:')
+    expect(html).not.toContain('author:')
+    expect(html).not.toContain('\\newpage')
+    expect(html).toContain('<h1>标题</h1>')
+    expect(html).toContain('<h2>第二节</h2>')
+    expect(html).toContain('<hr>')
+  })
+
+  it('does not rewrite newpage tokens inside fenced code', () => {
+    const html = markdownToHtml('```text\n\\newpage\n```')
+    expect(html).toContain('\\newpage')
+  })
+
   it('keeps image sources for the editor node view', () => {
     const html = markdownToHtml('![alt](https://example.com/a.png)')
     expect(html).toContain('<img')
